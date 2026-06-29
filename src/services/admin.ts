@@ -6,6 +6,9 @@ import {
   DocumentCategory,
   DocumentSummary,
   FeedbackStatsResponse,
+  RejectStagingResponse,
+  StagingCountResponse,
+  StagingDocumentSummary,
   UserRole,
 } from "@/types";
 
@@ -124,6 +127,52 @@ export async function updateUserRole(
   );
   if (res.status === 401) throw new Error("Accès administrateur requis.");
   if (!res.ok) await parseError(res, "Update user role");
+}
+
+export async function fetchStagingDocuments(): Promise<StagingDocumentSummary[]> {
+  const res = await fetch(`${BASE_URL}/admin/staging`, {
+    headers: adminHeaders({ "Content-Type": "application/json" }),
+    cache: "no-store",
+  });
+  if (res.status === 401) throw new Error("Accès administrateur requis.");
+  if (!res.ok) await parseError(res, "Staging list");
+  return res.json();
+}
+
+export async function fetchStagingCount(): Promise<StagingCountResponse> {
+  const res = await fetch(`${BASE_URL}/admin/staging/count`, {
+    headers: adminHeaders({ "Content-Type": "application/json" }),
+    cache: "no-store",
+  });
+  if (res.status === 401) throw new Error("Accès administrateur requis.");
+  if (!res.ok) await parseError(res, "Staging count");
+  return res.json();
+}
+
+export async function approveDocument(source: string): Promise<DocumentSummary> {
+  const res = await fetch(
+    `${BASE_URL}/admin/staging/${encodeURIComponent(source)}/approve`,
+    {
+      method: "POST",
+      headers: adminHeaders({ "Content-Type": "application/json" }),
+    }
+  );
+  if (res.status === 401) throw new Error("Accès administrateur requis.");
+  if (!res.ok) await parseError(res, "Approve");
+  return res.json();
+}
+
+export async function rejectDocument(source: string): Promise<RejectStagingResponse> {
+  const res = await fetch(
+    `${BASE_URL}/admin/staging/${encodeURIComponent(source)}`,
+    {
+      method: "DELETE",
+      headers: adminHeaders({ "Content-Type": "application/json" }),
+    }
+  );
+  if (res.status === 401) throw new Error("Accès administrateur requis.");
+  if (!res.ok) await parseError(res, "Reject");
+  return res.json();
 }
 
 export async function fetchFeedbackStats(): Promise<FeedbackStatsResponse> {

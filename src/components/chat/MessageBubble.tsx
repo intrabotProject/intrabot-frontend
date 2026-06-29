@@ -1,7 +1,6 @@
 "use client";
 
 import { ChatMessage, MessageFeedback as FeedbackValue } from "@/types";
-import ExcludedSourcesHint from "./ExcludedSourcesHint";
 import MessageFeedback from "./MessageFeedback";
 import SourceList from "./SourceList";
 
@@ -9,20 +8,14 @@ interface Props {
   message: ChatMessage;
   feedback?: FeedbackValue;
   onFeedback?: (messageId: string, value: FeedbackValue) => void;
-  onLowerThreshold?: (suggested: number) => void;
 }
 
 export default function MessageBubble({
   message,
   feedback,
   onFeedback,
-  onLowerThreshold,
 }: Props) {
   const isUser = message.role === "user";
-  const hasExcluded =
-    !isUser &&
-    (message.excluded_by_threshold?.length ?? 0) > 0 &&
-    (message.sources?.length ?? 0) === 0;
 
   return (
     <div className={`message-row ${isUser ? "user" : "assistant"}`}>
@@ -33,13 +26,6 @@ export default function MessageBubble({
         </div>
         {!isUser && message.sources && message.sources.length > 0 && (
           <SourceList sources={message.sources} />
-        )}
-        {hasExcluded && message.excluded_by_threshold && message.min_score !== undefined && (
-          <ExcludedSourcesHint
-            excluded={message.excluded_by_threshold}
-            minScore={message.min_score}
-            onLowerThreshold={onLowerThreshold}
-          />
         )}
         {!isUser && (
           <div className="message-meta">

@@ -116,6 +116,32 @@ export interface FeedbackStatsResponse {
   }>;
 }
 
+export interface UsageStatsResponse {
+  total_users: number;
+  total_feedback: number;
+  positive_feedback: number;
+  negative_feedback: number;
+  satisfaction_rate: number;
+  users_by_role: Record<string, number>;
+}
+
+export interface StagingDocumentSummary {
+  source: string;
+  submitted_by: string;
+  submitted_at: string;
+  category: DocumentCategory;
+  file_size_bytes: number | null;
+}
+
+export interface StagingCountResponse {
+  count: number;
+}
+
+export interface RejectStagingResponse {
+  source: string;
+  rejected: boolean;
+}
+
 // --- UI State ---
 
 export type MessageFeedback = "up" | "down";

@@ -7,6 +7,7 @@ import {
   SearchRequest,
   SearchResponse,
   ServiceStatus,
+  UsageStatsResponse,
 } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
@@ -62,6 +63,15 @@ export async function submitFeedback(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) await parseError(res, "Feedback");
+}
+
+export async function fetchUsageStats(): Promise<UsageStatsResponse> {
+  const res = await fetch(`${BASE_URL}/api/v1/stats/usage`, {
+    headers: authHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) await parseError(res, "Usage stats");
+  return res.json();
 }
 
 export async function triggerIngestion(): Promise<IngestResponse> {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { ChatMessage, DocumentListItem, MessageFeedback } from "@/types";
+import { ChatMessage, MessageFeedback } from "@/types";
 import MessageBubble from "@/components/chat/MessageBubble";
-import { fetchAvailableDocuments, search, submitFeedback } from "@/services/gateway";
+import { search, submitFeedback } from "@/services/gateway";
 import { ROLE_LABELS } from "@/lib/access";
 import { AuthUser, getCurrentUser } from "@/lib/auth";
 import {
@@ -22,12 +22,9 @@ export default function ChatPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [feedback, setFeedback] = useState<Record<string, MessageFeedback>>({});
-  const [documents, setDocuments] = useState<DocumentListItem[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [topK, setTopK] = useState(5);
-  const [minScore, setMinScore] = useState(0.35);
-  const [sourceFilter, setSourceFilter] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -38,24 +35,9 @@ export default function ChatPage() {
     setUser(current);
     setMessages(loadChatHistory(current.id));
     setFeedback(loadMessageFeedback(current.id));
-    setSourceFilter("");
     setInput("");
-    setDocuments([]);
     setHydrated(true);
   }, []);
-
-  useEffect(() => {
-    if (!hydrated || !user) return;
-
-    fetchAvailableDocuments()
-      .then((docs) => {
-        setDocuments(docs);
-        setSourceFilter((current) =>
-          current && !docs.some((doc) => doc.source === current) ? "" : current
-        );
-      })
-      .catch(() => setDocuments([]));
-  }, [hydrated, user?.id]);
 
   useEffect(() => {
     if (!hydrated || !user) return;
@@ -92,10 +74,6 @@ export default function ChatPage() {
     });
   }
 
-  function handleLowerThreshold(suggested: number) {
-    setMinScore(suggested);
-  }
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const question = input.trim();
@@ -116,8 +94,6 @@ export default function ChatPage() {
       const data = await search({
         question,
         top_k: topK,
-        min_score: minScore,
-        source_filter: sourceFilter || null,
       });
 
       const assistantMsg: ChatMessage = {
@@ -125,8 +101,6 @@ export default function ChatPage() {
         role: "assistant",
         content: data.answer,
         sources: data.sources,
-        excluded_by_threshold: data.excluded_by_threshold ?? [],
-        min_score: minScore,
         latency_ms: data.latency_ms,
         timestamp: new Date(),
       };
@@ -197,7 +171,6 @@ export default function ChatPage() {
                 message={msg}
                 feedback={feedback[msg.id]}
                 onFeedback={msg.role === "assistant" ? handleFeedback : undefined}
-                onLowerThreshold={handleLowerThreshold}
               />
             ))}
             {loading && (
@@ -220,25 +193,6 @@ export default function ChatPage() {
       <div className="chat-input-area">
         <div className="chat-controls">
           <div className="chat-control">
-            <label htmlFor="source-filter" className="top-k-label">
-              Document
-            </label>
-            <select
-              id="source-filter"
-              className="top-k-select chat-control-select"
-              value={sourceFilter}
-              onChange={(e) => setSourceFilter(e.target.value)}
-            >
-              <option value="">Tous les documents</option>
-              {documents.map((doc) => (
-                <option key={doc.source} value={doc.source}>
-                  {doc.source}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="chat-control">
             <label htmlFor="top-k" className="top-k-label">
               Sources
             </label>
@@ -256,21 +210,6 @@ export default function ChatPage() {
             </select>
           </div>
 
-          <div className="chat-control chat-control-wide">
-            <label htmlFor="min-score" className="top-k-label">
-              Pertinence min. ({minScore.toFixed(2)})
-            </label>
-            <input
-              id="min-score"
-              type="range"
-              className="chat-range"
-              min={0}
-              max={0.9}
-              step={0.05}
-              value={minScore}
-              onChange={(e) => setMinScore(Number(e.target.value))}
-            />
-          </div>
         </div>
 
         <form className="input-form" onSubmit={handleSubmit}>

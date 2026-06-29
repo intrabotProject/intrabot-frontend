@@ -14,6 +14,8 @@ import { logout } from "@/services/auth";
 
 const NAV = [
   { href: "/chat", label: "Recherche", icon: "⌕", requiresAuth: true },
+  { href: "/documents", label: "Soumettre", icon: "↑", requiresAuth: true, hideForAdmin: true },
+  { href: "/stats", label: "Activité", icon: "◈", requiresAuth: true },
   { href: "/admin", label: "Administration", icon: "⚙", requiresAdmin: true },
 ];
 
@@ -42,8 +44,12 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        {NAV.filter((item) => !item.requiresAdmin || showAdmin).map(
-          ({ href, label, icon }) => (
+        {NAV.filter((item) => {
+          if (item.requiresAdmin && !showAdmin) return false;
+          if (item.hideForAdmin && showAdmin) return false;
+          if (item.requiresAuth && !loggedIn) return false;
+          return true;
+        }).map(({ href, label, icon }) => (
             <Link
               key={href}
               href={href}

@@ -12,12 +12,7 @@ export interface UploadProgress {
   fileName: string;
 }
 
-interface Props {
-  onUploadFile: (file: File, category: DocumentCategory) => Promise<void>;
-  disabled?: boolean;
-}
-
-const CATEGORY_OPTIONS: DocumentCategory[] = [
+const ALL_CATEGORIES: DocumentCategory[] = [
   "public",
   "engineering",
   "rh",
@@ -25,7 +20,13 @@ const CATEGORY_OPTIONS: DocumentCategory[] = [
   "finance",
 ];
 
-export default function UploadZone({ onUploadFile, disabled = false }: Props) {
+interface Props {
+  onUploadFile: (file: File, category: DocumentCategory) => Promise<void>;
+  disabled?: boolean;
+  categoryOptions?: DocumentCategory[];
+}
+
+export default function UploadZone({ onUploadFile, disabled = false, categoryOptions = ALL_CATEGORIES }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +111,7 @@ export default function UploadZone({ onUploadFile, disabled = false }: Props) {
           onChange={(e) => setCategory(e.target.value as DocumentCategory)}
           disabled={disabled || uploading}
         >
-          {CATEGORY_OPTIONS.map((option) => (
+          {categoryOptions.map((option) => (
             <option key={option} value={option}>
               {CATEGORY_LABELS[option]}
             </option>
