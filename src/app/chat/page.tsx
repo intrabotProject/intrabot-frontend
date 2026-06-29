@@ -1,28 +1,105 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { ChatMessage } from "@/types";
+import { ChatMessage, DocumentListItem, MessageFeedback } from "@/types";
 import MessageBubble from "@/components/chat/MessageBubble";
+import { fetchAvailableDocuments, search, submitFeedback } from "@/services/gateway";
+import { ROLE_LABELS } from "@/lib/access";
+import { AuthUser, getCurrentUser } from "@/lib/auth";
+import {
+  clearChatHistory,
+  loadChatHistory,
+  loadMessageFeedback,
+  saveChatHistory,
+  saveMessageFeedback,
+} from "@/lib/chatHistory";
 
 function genId() {
   return Math.random().toString(36).slice(2);
 }
 
 export default function ChatPage() {
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [feedback, setFeedback] = useState<Record<string, MessageFeedback>>({});
+  const [documents, setDocuments] = useState<DocumentListItem[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [topK, setTopK] = useState(5);
+  const [minScore, setMinScore] = useState(0.35);
+  const [sourceFilter, setSourceFilter] = useState("");
+  const [hydrated, setHydrated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const current = getCurrentUser();
+    if (!current) return;
+
+    setUser(current);
+    setMessages(loadChatHistory(current.id));
+    setFeedback(loadMessageFeedback(current.id));
+    setSourceFilter("");
+    setInput("");
+    setDocuments([]);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !user) return;
+
+    fetchAvailableDocuments()
+      .then((docs) => {
+        setDocuments(docs);
+        setSourceFilter((current) =>
+          current && !docs.some((doc) => doc.source === current) ? "" : current
+        );
+      })
+      .catch(() => setDocuments([]));
+  }, [hydrated, user?.id]);
+
+  useEffect(() => {
+    if (!hydrated || !user) return;
+    saveChatHistory(user.id, messages);
+  }, [messages, hydrated, user?.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  function handleFeedback(messageId: string, value: MessageFeedback) {
+    if (!user) return;
+
+    const assistantMsg = messages.find((msg) => msg.id === messageId);
+    const msgIndex = messages.findIndex((msg) => msg.id === messageId);
+    const question =
+      msgIndex > 0 && messages[msgIndex - 1]?.role === "user"
+        ? messages[msgIndex - 1].content
+        : undefined;
+
+    setFeedback((prev) => {
+      const next = { ...prev, [messageId]: value };
+      saveMessageFeedback(user.id, next);
+      return next;
+    });
+
+    submitFeedback({
+      message_id: messageId,
+      value,
+      question,
+      answer: assistantMsg?.content,
+    }).catch(() => {
+      /* le retour local reste affiché même si l'envoi serveur échoue */
+    });
+  }
+
+  function handleLowerThreshold(suggested: number) {
+    setMinScore(suggested);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const question = input.trim();
-    if (!question || loading) return;
+    if (!question || loading || !user) return;
 
     const userMsg: ChatMessage = {
       id: genId(),
@@ -36,20 +113,20 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, top_k: topK }),
+      const data = await search({
+        question,
+        top_k: topK,
+        min_score: minScore,
+        source_filter: sourceFilter || null,
       });
-
-      if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
-      const data = await res.json();
 
       const assistantMsg: ChatMessage = {
         id: genId(),
         role: "assistant",
         content: data.answer,
         sources: data.sources,
+        excluded_by_threshold: data.excluded_by_threshold ?? [],
+        min_score: minScore,
         latency_ms: data.latency_ms,
         timestamp: new Date(),
       };
@@ -72,7 +149,17 @@ export default function ChatPage() {
   }
 
   function handleClear() {
+    if (!user) return;
     setMessages([]);
+    clearChatHistory(user.id);
+  }
+
+  if (!hydrated || !user) {
+    return (
+      <div className="chat-page">
+        <p className="admin-loading">Chargement de la conversation…</p>
+      </div>
+    );
   }
 
   return (
@@ -81,7 +168,9 @@ export default function ChatPage() {
         <div>
           <h1 className="page-title">Recherche documentaire</h1>
           <p className="page-subtitle">
-            Posez une question en langage naturel sur la documentation interne.
+            Connecté en tant que{" "}
+            <strong>{ROLE_LABELS[user.role]}</strong> ({user.email}) — accès
+            limité à votre profil.
           </p>
         </div>
         {messages.length > 0 && (
@@ -97,14 +186,19 @@ export default function ChatPage() {
             <div className="empty-icon">⌕</div>
             <p className="empty-title">Commencez par poser une question</p>
             <p className="empty-sub">
-              Exemples : « Quelle est la politique de télétravail ? » ou
-              « Comment configurer le pipeline CI/CD ? »
+              Votre historique est sauvegardé pour ce compte dans ce navigateur.
             </p>
           </div>
         ) : (
           <div className="message-list">
             {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
+              <MessageBubble
+                key={msg.id}
+                message={msg}
+                feedback={feedback[msg.id]}
+                onFeedback={msg.role === "assistant" ? handleFeedback : undefined}
+                onLowerThreshold={handleLowerThreshold}
+              />
             ))}
             {loading && (
               <div className="message-row assistant">
@@ -124,22 +218,59 @@ export default function ChatPage() {
       </div>
 
       <div className="chat-input-area">
-        <div className="top-k-control">
-          <label htmlFor="top-k" className="top-k-label">
-            Sources à consulter
-          </label>
-          <select
-            id="top-k"
-            className="top-k-select"
-            value={topK}
-            onChange={(e) => setTopK(Number(e.target.value))}
-          >
-            {[3, 5, 8, 10].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+        <div className="chat-controls">
+          <div className="chat-control">
+            <label htmlFor="source-filter" className="top-k-label">
+              Document
+            </label>
+            <select
+              id="source-filter"
+              className="top-k-select chat-control-select"
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+            >
+              <option value="">Tous les documents</option>
+              {documents.map((doc) => (
+                <option key={doc.source} value={doc.source}>
+                  {doc.source}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="chat-control">
+            <label htmlFor="top-k" className="top-k-label">
+              Sources
+            </label>
+            <select
+              id="top-k"
+              className="top-k-select"
+              value={topK}
+              onChange={(e) => setTopK(Number(e.target.value))}
+            >
+              {[3, 5, 8, 10].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="chat-control chat-control-wide">
+            <label htmlFor="min-score" className="top-k-label">
+              Pertinence min. ({minScore.toFixed(2)})
+            </label>
+            <input
+              id="min-score"
+              type="range"
+              className="chat-range"
+              min={0}
+              max={0.9}
+              step={0.05}
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
+            />
+          </div>
         </div>
 
         <form className="input-form" onSubmit={handleSubmit}>
