@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IntraBot - Chatbot RAG documentaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --ink:        #0F1623;
+      --ink-muted:  #5A6478;
+      --surface:    #FFFFFF;
+      --bg:         #F4F6FA;
+      --rule:       #E0E4EC;
+      --accent:     #1D3461;
+      --accent-lt:  #EEF2FA;
+      --accent-mid: #2F5496;
+      --tag-bg:     #E8EDF7;
+      --tag-text:   #1D3461;
+      --green:      #166534;
+      --green-bg:   #DCFCE7;
+      --font-display: 'DM Serif Display', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--surface);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+      padding: 0 48px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      color: var(--ink-muted);
+      font-weight: 500;
+      transition: color .15s;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: #fff !important;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      transition: opacity .15s !important;
+    }
+
+    .nav-cta:hover { opacity: .85 !important; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 96px 48px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-mid);
+      background: var(--accent-lt);
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      letter-spacing: .3px;
+    }
+
+    .hero-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-mid);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 52px;
+      line-height: 1.1;
+      letter-spacing: -.5px;
+      color: var(--ink);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent-mid);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity .15s, transform .1s;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .btn-ghost {
+      color: var(--ink-muted);
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
+      border: 1px solid var(--rule);
+      padding: 11px 20px;
+      border-radius: 5px;
+    }
+
+    .btn-ghost:hover { color: var(--ink); border-color: var(--ink-muted); }
+
+    /* ── Hero visual - simulated chat ── */
+    .hero-visual {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(15,22,35,.08);
+    }
+
+    .chat-bar {
+      background: var(--accent);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-bar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.3);
+    }
+
+    .chat-bar-title {
+      color: rgba(255,255,255,.8);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      margin-left: 4px;
+    }
+
+    .chat-body {
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .chat-msg.user { flex-direction: row-reverse; }
+
+    .chat-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+    }
+
+    .chat-avatar.bot { background: var(--accent-lt); color: var(--accent); }
+    .chat-avatar.user-av { background: var(--accent); color: #fff; }
+
+    .chat-bubble {
+      padding: 10px 13px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      max-width: 240px;
+    }
+
+    .chat-bubble.bot {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+
+    .chat-bubble.user {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .source-pills {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .source-pill {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+
+    .score-pill {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: var(--green-bg);
+      color: var(--green);
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+
+    /* ── STACK SECTION ── */
+    .stack-band {
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background: var(--bg);
+      padding: 20px 48px;
+    }
+
+    .stack-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stack-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--ink-muted);
+      margin-right: 8px;
+    }
+
+    .stack-tag {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      color: var(--ink-muted);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 80px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-mid);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      line-height: 1.15;
+      letter-spacing: -.3px;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      max-width: 560px;
+      margin-bottom: 48px;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      position: relative;
+    }
+
+    .pipeline-step {
+      flex: 1;
+      position: relative;
+      padding: 24px 20px 24px 0;
+    }
+
+    .pipeline-step:not(:last-child)::after {
+      content: '\27F6';
+      position: absolute;
+      right: 90px;
+      top: -21px;
+      width: 30px;
+      color: var(--rule);
+      font-size: 80px;
+      font-weight: bold;
+    }
+
+    .pipe-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-lt);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .pipe-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .pipe-desc {
+      font-size: 12px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+    }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      padding: 28px 24px;
+      transition: background .15s;
+    }
+
+    .feature-card:hover { background: var(--bg); }
+
+    .feature-icon {
+      font-size: 22px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--ink-muted);
+    }
+
+    .feature-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+
+    /* ── ARCHITECTURE ── */
+    .arch-section {
+      background: var(--bg);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .arch-section section {
+      padding: 80px 48px;
+    }
+
+    .arch-diagram {
+      background: var(--ink);
+      border-radius: 10px;
+      padding: 32px 36px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: rgba(255,255,255,.5);
+      overflow-x: auto;
+    }
+
+    .arch-diagram .highlight { color: #7DD3FC; }
+    .arch-diagram .accent-text { color: #86EFAC; }
+    .arch-diagram .muted { color: rgba(255,255,255,.25); }
+    .arch-diagram .arrow { color: rgba(255,255,255,.35); }
+
+    /* ── TEAM ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .team-card {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .team-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-family: var(--font-display);
+    }
+
+    .team-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .team-role {
+      font-size: 12px;
+      color: var(--ink-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ── CTA FINALE ── */
+    .cta-section {
+      text-align: center;
+      padding: 96px 48px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .cta-section .section-title {
+      margin-bottom: 12px;
+    }
+
+    .cta-section .section-sub {
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: rgba(255,255,255,.4);
+      padding: 28px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .footer-brand { color: rgba(255,255,255,.7); font-weight: 500; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--rule);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── Animations ── */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px; }
+      .hero h1 { font-size: 36px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .team-grid { grid-template-columns: 1fr 1fr; }
+      nav { padding: 0 24px; }
+      nav .nav-links { display: none; }
+      .pipeline { flex-direction: column; gap: 16px; }
+      .pipeline-step::after { display: none; }
+      section { padding: 56px 24px; }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">
+      <span class="nav-name">IntraBot</span>
+    </div>
+    <div class="nav-links">
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#equipe">Équipe</a>
+      <a href="http://localhost:3000" class="nav-cta">Ouvrir l'application →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="hero">
+      <div class="hero-text">
+        <div class="hero-eyebrow">
+          <span class="hero-dot"></span>
+          Projet TNSI - Université Paris Dauphine
+        </div>
+        <h1>La documentation interne,<br /><em>enfin interrogeable</em></h1>
+        <p class="hero-sub">
+          IntraBot est un chatbot RAG qui permet aux collaborateurs d'interroger
+          la documentation interne en langage naturel et d'obtenir des réponses
+          ancrées sur les documents réels, avec citation des sources.
+        </p>
+        <div class="hero-actions">
+          <a href="http://localhost:3000" class="btn-primary">
+            Accéder à l'application
+            <span>→</span>
+          </a>
+          <a href="#fonctionnalites" class="btn-ghost">Voir les fonctionnalités</a>
+        </div>
+      </div>
+
+      <!-- Simulated chat UI -->
+      <div class="hero-visual">
+        <div class="chat-bar">
+          <div class="chat-bar-dot"></div>
+          <div class="chat-bar-dot"></div>
+          <div class="chat-bar-dot"></div>
+          <span class="chat-bar-title">intrabot / recherche</span>
+        </div>
+        <div class="chat-body">
+          <div class="chat-msg user">
+            <div class="chat-avatar user-av">V</div>
+            <div class="chat-bubble user">Quelle est la politique de télétravail ?</div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar bot">IB</div>
+            <div>
+              <div class="chat-bubble bot">
+                Le télétravail est autorisé jusqu'à 3 jours par semaine, sous réserve de l'accord du manager direct. Une présence minimale de 2 jours au bureau est requise.
+              </div>
+              <div class="source-pills">
+                <span class="source-pill">rh_teletravail_2025.pdf</span>
+                <span class="score-pill">91%</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg user">
+            <div class="chat-avatar user-av">V</div>
+            <div class="chat-bubble user">Comment configurer le pipeline CI/CD ?</div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar bot">IB</div>
+            <div>
+              <div class="chat-bubble bot">
+                La configuration du pipeline se fait via le fichier <code style="font-family:var(--font-mono);font-size:11px;">.gitlab-ci.yml</code> à la racine du projet. Les étapes build, test et deploy sont définies…
+              </div>
+              <div class="source-pills">
+                <span class="source-pill">devops_cicd_guide.pdf</span>
+                <span class="score-pill">87%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK BAND -->
+  <div class="stack-band">
+    <div class="stack-inner">
+      <span class="stack-label">Stack</span>
+      <span class="stack-tag">Next.js 14</span>
+      <span class="stack-tag">FastAPI</span>
+      <span class="stack-tag">ChromaDB</span>
+      <span class="stack-tag">Cohere</span>
+      <span class="stack-tag">Docling</span>
+      <span class="stack-tag">Python 3.11</span>
+      <span class="stack-tag">TypeScript</span>
+    </div>
+  </div>
+
+  <!-- PIPELINE RAG -->
+  <section id="pipeline">
+    <div class="section-eyebrow">Pipeline RAG</div>
+    <h2 class="section-title">De la question à la réponse sourcée</h2>
+    <p class="section-sub">
+      Chaque requête suit un pipeline déterministe en cinq étapes; aucune réponse
+      n'est inventée, tout est ancré sur les documents indexés.
+    </p>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipe-icon">⌕</div>
+        <div class="pipe-label">Question</div>
+        <div class="pipe-desc">L'utilisateur pose une question en langage naturel</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipe-icon">⟳</div>
+        <div class="pipe-label">Embedding</div>
+        <div class="pipe-desc">La question est vectorisée par Cohere embed</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipe-icon">◎</div>
+        <div class="pipe-label">Retrieval</div>
+        <div class="pipe-desc">ChromaDB retourne les chunks les plus proches</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipe-icon">⊞</div>
+        <div class="pipe-label">Augmentation</div>
+        <div class="pipe-desc">Le prompt est allimenté avec les passages sourcés</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipe-icon">✦</div>
+        <div class="pipe-label">Génération</div>
+        <div class="pipe-desc">Le LLM produit une réponse avec citations</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <section id="fonctionnalites">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont une équipe a besoin</h2>
+    <p class="section-sub">
+      IntraBot couvre le cycle complet, de l'ingestion des documents jusqu'au suivi
+      de la qualité des réponses, avec des garde-fous pensés pour un usage professionnel.
+    </p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">⌕</span>
+        <div class="feature-title">Recherche documentaire RAG</div>
+        <div class="feature-desc">
+          Questions en langage naturel sur toute la documentation interne.
+          Les réponses citent leurs sources avec un score de pertinence.
+        </div>
+        <span class="feature-tag">search · retrieval</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">◈</span>
+        <div class="feature-title">Contrôle d'accès par rôle</div>
+        <div class="feature-desc">
+          5 profils (Collaborateur, Ingénieur, Manager, RH, Admin) avec accès
+          différencié. Un RH ne voit que les documents RH.
+        </div>
+        <span class="feature-tag">RBAC · sécurité</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">↑</span>
+        <div class="feature-title">Gestion documentaire admin</div>
+        <div class="feature-desc">
+          Upload, réindexation et suppression depuis l'interface. Ingestion
+          incrémentale, seuls les fichiers nouveaux sont retraités.
+        </div>
+        <span class="feature-tag">ingestion · admin</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">✓</span>
+        <div class="feature-title">Workflow de validation</div>
+        <div class="feature-desc">
+          Les utilisateurs soumettent des documents selon leur profil. L'admin
+          examine et approuve avant intégration au chatbot.
+        </div>
+        <span class="feature-tag">workflow · approbation</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">◑</span>
+        <div class="feature-title">Feedback et suivi qualité</div>
+        <div class="feature-desc">
+          Chaque réponse est notable (👍/👎). Une page Activité affiche
+          le taux de satisfaction et les retours par rôle pour l'admin.
+        </div>
+        <span class="feature-tag">analytics · feedback</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⊘</span>
+        <div class="feature-title">Garde-fous anti-hallucination</div>
+        <div class="feature-desc">
+          Le LLM répond uniquement à partir des documents indexés. Les questions
+          hors sujet reçoivent un refus explicite, sans invention.
+        </div>
+        <span class="feature-tag">guardrails · fiabilité</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <div class="arch-section">
+    <section id="architecture">
+      <div class="section-eyebrow">Architecture</div>
+      <h2 class="section-title">Trois couches, deux microservices</h2>
+      <p class="section-sub">
+        Une architecture hexagonale découplée : chaque composant peut évoluer
+        indépendamment, et le passage par l'orchestrateur se résume à changer
+        deux variables d'environnement.
+      </p>
+      <div class="arch-diagram">
+        <img 
+          src="architecture.jpg" 
+          alt="Schéma d'architecture IntraBot" 
+          style="width: 100%; display: block; border-radius: 10px;"
+        />
+        <div>
+          <span class="muted">┌────────────────────────────────────────────┐</span>
+        </div>
+        <div>
+          <span class="muted">│</span>  
+          <span class="highlight">Frontend</span>  
+          <span class="muted">(Next.js 14 - App Router - :3000)</span>
+          <span class="muted">│</span>
+        </div>
+        <div>
+          <span class="muted">│</span> 
+          <span class="muted">API Routes BFF  ·  TypeScript  ·  CSS custom</span>        
+          <span class="muted">&nbsp;&nbsp;│</span>
+        </div>
+        <div>
+          <span class="muted">└────────────────────┬───────────────────────┘</span>
+        </div>
+        <div>                       
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  HTTP</span>
+        </div>
+        <div>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;┌──────────┴───────────┐</span>
+        </div>
+        <div>          
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>                        
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+        </div>
+        <div>
+          <span class="muted">┌────────────────────┐</span>    
+          <span class="muted">┌────────────────────┐</span>
+        </div>
+        <div>
+          <span class="muted">│</span> 
+          <span class="highlight">intrabot-ingestion</span>
+          <span class="muted">│</span>    
+          <span class="muted">│</span>  
+          <span class="highlight">&nbsp;intrabot-search</span>      
+          <span class="muted">&nbsp;&nbsp;│</span>
+        </div>
+        <div>
+          <span class="muted">│</span>  
+          <span class="muted">FastAPI · :8001</span>  
+          <span class="muted">&nbsp;&nbsp;&nbsp;│</span>    
+          <span class="muted">│</span>  
+          <span class="muted">&nbsp;FastAPI · :8002</span>      
+          <span class="muted">&nbsp;&nbsp;│</span>
+        </div>
+        <div>
+          <span class="muted">│</span>  
+          <span class="muted">Docling · Cohere</span> 
+          <span class="muted">&nbsp;&nbsp;│</span>    
+          <span class="muted">│</span>  
+          <span class="muted">&nbsp;Cohere · ChromaDB</span>    
+          <span class="muted">│</span>
+        </div>
+        <div>
+          <span class="muted">└─────────┬──────────┘</span>    
+          <span class="muted">└─────────┬──────────┘</span>
+        </div>
+        <div>         
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>                        
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+        </div>
+        <div>
+          <span class="muted">┌──────────────────────────────────────────────────────┐</span>
+        </div>
+        <div>
+          <span class="muted">│</span>  
+          <span class="accent-text">ChromaDB</span>  
+          <span class="muted">(base vectorielle partagée - fichier local)</span>  
+          <span class="muted">│</span>
+        </div>
+        <div>
+          <span class="muted">└──────────────────────────────────────────────────────┘</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TEAM -->
+  <section id="equipe">
+    <div class="section-eyebrow">Équipe</div>
+    <h2 class="section-title">Projet TNSI - Paris Dauphine</h2>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">AB</div>
+        <div class="team-name">Asma</div>
+        <div class="team-role">Backend · Ingestion</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">V & A</div>
+        <div class="team-name">Victorien - Nabila</div>
+        <div class="team-role">Backend · Search</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">D & N</div>
+        <div class="team-name">Djamila - Nada</div>
+        <div class="team-role">Frontend · UI</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">DA</div>
+        <div class="team-name">Djamila</div>
+        <div class="team-role">Orchestrateur · Administration</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINALE -->
+  <div style="border-top:1px solid var(--rule);">
+    <div class="cta-section">
+      <div class="section-eyebrow" style="text-align:center;">Démo</div>
+      <h2 class="section-title">Prêt à interroger vos documents ?</h2>
+      <p class="section-sub">
+        L'application tourne en local. Assurez-vous que les microservices
+        sont démarrés avant d'accéder à l'interface.
+      </p>
+      <a href="http://localhost:3000" class="btn-primary" style="font-size:15px;padding:14px 28px;">
+        Accéder à IntraBot →
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-brand">IntraBot</span>
+    <span>Université Paris Dauphine · TNSI</span>
+  </footer>
+
+</body>
+</html>
