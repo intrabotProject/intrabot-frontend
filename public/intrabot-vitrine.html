@@ -899,43 +899,66 @@
           <span class="muted">┌──────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span> Infrastructure<span class="muted"></span>
+          <span class="muted">│</span> 
+          <span class="muted">Infrastructure</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span> 
         </div>
         <div>
           <span class="muted">└───────────────────────────┬──────────────────────────┘</span>
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>&nbsp; appelle des cas d'usage
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="muted">&nbsp; appelle des cas d'usage</span>
         </div>
         <div>
           <span class="muted">┌──────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span>  Application<span class="muted"></span>
+          <span class="muted">│</span>  
+          <span>Application</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span>  
         </div>
         <div>
           <span class="muted">└───────────────────────────┬──────────────────────────┘</span>
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>&nbsp; dépend d'interfaces, pas d'implémentations
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="muted">&nbsp; dépend d'interfaces, pas d'implémentations</span>
         </div>
         <div>
-          <span class="muted">┌──────────────────────────────────────────────────────┐</span>
+          <span class="muted">┌───────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span>  <span class="accent-text">Domain (hexagone)</span><span class="muted"></span>
+          <span class="muted">│</span>  
+          <span class="accent-text">Domain (hexagone)</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span>  
         </div>
         <div>
           <span class="muted">└──┬─────────┬─────────┬─────────┬─────────┬─────────┬──┘</span>
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
         </div>
         <div>
-          <span class="muted">Loader&nbsp;&nbsp;</span> <span class="muted">Parser&nbsp;&nbsp;</span> <span class="muted">Chunker&nbsp;</span> <span class="muted">Embedder</span> <span class="muted">VectorStore</span> <span class="muted">Storage</span>
+          <span class="muted">&nbsp;Loader&nbsp;&nbsp;</span> 
+          <span class="muted">&nbsp;Parser&nbsp;&nbsp;</span> 
+          <span class="muted">Chunker&nbsp;</span> 
+          <span class="muted">&nbsp;Embedder</span> 
+          <span class="muted">VectorStore</span> 
+          <span class="muted">Storage</span>
         </div>
         <div>
-          <span class="muted">(local)&nbsp;</span> <span class="muted">(docling)</span> <span class="muted">(docling)</span> <span class="accent-text">(Cohere)</span> <span class="accent-text">(ChromaDB)</span> <span class="muted">(JSON)</span>
+          <span class="muted">(local)&nbsp;</span> 
+          <span class="muted">(docling)</span> 
+          <span class="muted">(docling)</span> 
+          <span class="accent-text">&nbsp;(Cohere)</span> 
+          <span class="accent-text">(ChromaDB)</span> 
+          <span class="muted">&nbsp;(JSON)</span>
         </div>
         <div style="margin-top: 8px;">
           <span class="muted" style="font-size: 11px;">→ les adapters implémentent les ports du domaine ; le domaine ne connaît ni Cohere, ni ChromaDB, ni Docling.</span>
@@ -950,55 +973,83 @@
           <span class="muted">┌──────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span>  Infrastructure<span class="muted"></span>
+          <span class="muted">│</span>  
+          <span class="muted">Infrastructure</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span>  
+          
         </div>
         <div>
           <span class="muted">└───────────────────────────┬──────────────────────────┘</span>
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>&nbsp; appelle le port primaire
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="muted">&nbsp; appelle le port primaire</span>
         </div>
         <div>
-          <span class="muted">┌──────────────────────────────────────────────────────┐</span>
+          <span class="muted">┌─────────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span>  <span class="accent-text">Domain (hexagone)</span> &nbsp;·&nbsp; <span class="highlight">interfaces/primary/search_service</span>  <span class="muted">│</span>
+          <span class="muted">│</span>  
+          <span class="accent-text">Domain (hexagone)</span> 
+          <span class="highlight">&nbsp;·&nbsp; interfaces/primary/search_service</span>  
+          <span class="muted">│</span>
         </div>
         <div>
-          <span class="muted">│</span>  models<span class="muted"></span>
+          <span class="muted">│</span>  
+          <span>models</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span>  
         </div>
         <div>
-          <span class="muted">└───────────────────────────┬──────────────────────────┘</span>
+          <span class="muted">└────────────────────────────┬────────────────────────────┘</span>
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>&nbsp; implémenté par
+          <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>
+          <span class="muted">&nbsp; implémenté par</span>
         </div>
         <div>
-          <span class="muted">┌──────────────────────────────────────────────────────┐</span>
+          <span class="muted">┌─────────────────────────────────────────────────────────┐</span>
         </div>
         <div>
-          <span class="muted">│</span>  Application<span class="muted"></span>
+          <span class="muted">│</span>  
+          <span>Application</span>
+          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</span>  
         </div>
         <div>
-          <span class="muted">└──┬──────────────┬──────────────┬──────────────┬───────┘</span>
+          <span class="muted">└───────┬──────────────┬─────────────┬────────────┬───────┘</span>
         </div>
         <div>
-          <span class="muted">&nbsp;&nbsp;│</span>&nbsp; dépend des ports secondaires
+          <!--<span class="muted">&nbsp;&nbsp;│</span>-->
         </div>
         <div>
-          <span class="arrow">&nbsp;&nbsp;↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;<span class="muted">dépend des ports secondaires</span>
         </div>
         <div>
-          <span class="muted">EmbeddingProvider</span> <span class="muted">VectorStore</span> <span class="muted">LLMProvider</span> <span class="muted">PromptBuilder</span>
+          <span class="muted">EmbeddingProvider</span> 
+          <span class="muted">VectorStore</span> 
+          <span class="muted">&nbsp;LLMProvider</span> 
+          <span class="muted">&nbsp;&nbsp;PromptBuilder</span>
         </div>
         <div>
-          <span class="muted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="muted">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="muted">↓</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="muted">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span>
         </div>
         <div>
-          <span class="muted">ingestion_service</span> <span class="accent-text">chroma_vector_</span> <span class="accent-text">cohere_llm_</span> <span class="muted">rag_prompt_</span>
+          <span class="muted">ingestion_service</span> 
+          <span class="accent-text">chroma_vector_</span> 
+          <span class="accent-text">cohere_llm_</span> 
+          <span class="muted">rag_prompt_</span>
         </div>
         <div>
-          <span class="muted">embedding_adapter</span> <span class="accent-text">store</span> <span class="accent-text">provider</span> <span class="muted">builder</span>
+          <span class="muted">embedding_adapter</span> 
+          &nbsp;&nbsp;&nbsp;<span class="accent-text">store</span> 
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="accent-text">provider</span> 
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="muted">builder</span>
         </div>
         <div style="margin-top: 8px;">
           <span class="muted" style="font-size: 11px;">→ <span class="highlight">factories/provider_factory.py</span> instancie les adapters et les injecte dans rag_search_service via les ports du domaine.</span>
